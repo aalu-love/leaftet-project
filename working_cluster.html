@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Map Example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map {
+      height: calc(100vh - 2vh);
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css">
+
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    var markers = L.markerClusterGroup();
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(map);
+
+    function generateEmployeeData() {
+      var employees = [];
+
+      for (var i = 1; i <= 50; i++) {
+        var emp_id = i;
+        var name = 'Employee ' + emp_id;
+        var latitude = Math.random() * (90 - (-90)) + (-90);
+        var longitude = Math.random() * (180 - (-180)) + (-180);
+
+        employees.push({ emp_id, name, latitude, longitude });
+      }
+
+      return employees;
+    }
+
+    function createMarkers(employees) {
+      employees.forEach(function (employee) {
+        var marker = L.marker([employee.latitude, employee.longitude])
+          .bindPopup('<b>Employee ID:</b> ' + employee.emp_id + '<br><b>Name:</b> ' + employee.name);
+
+        markers.addLayer(marker);
+      });
+
+      map.addLayer(markers);
+    }
+
+    var employees = generateEmployeeData();
+    createMarkers(employees);
+  </script>
+</body>
+</html>

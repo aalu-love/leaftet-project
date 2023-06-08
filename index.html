@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leaflet Map Example</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+      #map {
+        height: calc(100vh - 5vh);
+      }
+      #toast-container {
+        font-family: "Courier New", Courier, monospace;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        max-width: fit-content;
+        z-index: 9999;
+      }
+
+      .toast {
+        display: none;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+
+      .toast.show {
+        display: block;
+        animation: slideIn 0.5s, fadeOut 0.5s 2s;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="toast-container" />
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" />
+
+    <script>
+      var map = L.map("map").setView([51.505, -0.09], 13);
+      var markers = L.markerClusterGroup();
+      var employees = generateEmployeeData();
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 18,
+      }).addTo(map);
+
+      function updateEmployeeCoordinates(event) {
+        var marker = event.target;
+        var latlng = marker.getLatLng();
+        var latitude = latlng.lat.toFixed(6);
+        var longitude = latlng.lng.toFixed(6);
+
+        var employee = marker.employee;
+        employee.latitude = latitude;
+        employee.longitude = longitude;
+
+        console.log("Updated coordinates:", latitude, longitude);
+      }
+
+      function generateEmployeeData() {
+        var employees = [];
+
+        for (var i = 1; i <= 50; i++) {
+          var emp_id = i;
+          var name = "Employee " + emp_id;
+          var latitude = Math.random() * (90 - -90) + -90;
+          var longitude = Math.random() * (180 - -180) + -180;
+
+          employees.push({ emp_id, name, latitude, longitude });
+        }
+
+        return employees;
+      }
+
+      function createMarkers(employees) {
+        employees.forEach(function (employee) {
+          var marker = L.marker([employee.latitude, employee.longitude], { draggable: true });
+          const popupContent = `
+            <div>
+              <b>Employee ID:</b>
+              <a href="#" class="employee-link" data-empid="${employee.emp_id}">${employee.emp_id}</a>
+            </div>
+            `;
+
+          marker.bindPopup(popupContent);
+          marker.on("dragend", updateEmployeeCoordinates);
+          marker.employee = employee;
+          markers.addLayer(marker);
+        });
+        map.addLayer(markers);
+      }
+
+      function showEmployeeDetails(employee) {
+        var toastContainer = document.getElementById("toast-container");
+        var toast = document.createElement("div");
+
+        toast.className = "toast";
+        toast.innerHTML = `<p>
+          Employee ID: ${employee.emp_id}<br />
+          Name: ${employee.name}<br />
+          Latitude: ${employee.latitude}<br />
+          Longitude: ${employee.longitude}<br />
+          </p>`;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(function () {
+          toast.classList.add("show");
+        }, 100);
+
+        setTimeout(function () {
+          toast.remove();
+        }, 2500);
+      }
+
+      // Event delegation for employee links
+      document.addEventListener("click", function (event) {
+        var target = event.target;
+
+        if (target.classList.contains("employee-link")) {
+          var empId = target.getAttribute("data-empid");
+          var employee = employees.find(function (emp) {
+            return emp.emp_id == empId;
+          });
+
+          if (employee) {
+            showEmployeeDetails(employee);
+          } else {
+            console.error("Employee not found.");
+          }
+
+          event.preventDefault();
+        }
+      });
+
+      createMarkers(employees);
+    </script>
+  </body>
+</html>

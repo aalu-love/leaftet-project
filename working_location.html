@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Map Example</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    #map {
+      height: calc(100vh - 2vh);
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([51.505, -0.09], 13);
+    var marker;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(map);
+
+    function updateEmployeeCoordinates(event) {
+      var latlng = marker.getLatLng();
+      var latitude = latlng.lat.toFixed(6);
+      var longitude = latlng.lng.toFixed(6);
+
+      // Update the employee's coordinates in your database or data structure
+      // Here, we'll just display them in the console
+      console.log('Updated coordinates:', latitude, longitude);
+    }
+
+    marker = L.marker([51.5, -0.09], { draggable: true }).addTo(map);
+    marker.bindPopup('<b>Hello, Leaflet!</b><br>This is a marker.').openPopup();
+
+    // Add an event listener to update the coordinates when the marker is dragged
+    marker.on('dragend', updateEmployeeCoordinates);
+  </script>
+</body>
+</html>
